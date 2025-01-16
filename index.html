@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .medicine-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .medicine-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+        .medicine-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            filter: brightness(90%);
+        }
+        .medicine-card .card-body {
+            background-color: #fff;
+            padding: 15px;
+        }
+        .medicine-card h5 {
+            font-size: 1.2rem;
+            color: #343a40;
+            margin-bottom: 10px;
+        }
+        .medicine-card p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .medicine-card .list-group-item {
+            font-size: 0.85rem;
+            background-color: #f8f9fa;
+        }
+        .expired {
+            border: 2px solid red;
+        }
+        .search-bar, .filter-sort-bar {
+            margin: 20px 0;
+        }
+        .dark-mode {
+            background-color: #343a40;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Medical Shop</h1>
+        <div class="row justify-content-between align-items-center filter-sort-bar">
+            <div class="col-md-4">
+                <input type="text" id="searchBar" class="form-control" placeholder="Search for medicines...">
+            </div>
+            <div class="col-md-4">
+                <select id="categoryFilter" class="form-select">
+                    <option value="">All Categories</option>
+                    <option value="Tablet">Tablet</option>
+                    <option value="Antibiotic">Antibiotic</option>
+                    <option value="Supplement">Supplement</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select id="sortOptions" class="form-select">
+                    <option value="">Sort By</option>
+                    <option value="name">Name</option>
+                    <option value="price">Price</option>
+                    <option value="expiration">Expiration Date</option>
+                </select>
+            </div>
+            <div class="col-md-2 mt-2">
+                <button id="toggleMode" class="btn btn-secondary">Light/Dark Mode</button>
+            </div>
+        </div>
+
+        <div class="row" id="medicineContainer">
+            <!-- Medicine cards will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+    const medicines = [
+        { name: "Paracetamol", category: "Tablet", img: "img1.jpg", expiration: "2025-12-31", price: "50", location: "Shelf A1", description: "Used for fever and mild pain relief.", stock: true },
+        { name: "Amoxicillin", category: "Antibiotic", img: "img2.jpg", expiration: "2026-06-30", price: "120", location: "Shelf B2", description: "Antibiotic for bacterial infections.", stock: false },
+        { name: "Ibuprofen", category: "Tablet", img: "img3.jpg", expiration: "2025-09-15", price: "90", location: "Shelf C3", description: "Relieves inflammation, pain, and fever.", stock: true },
+        { name: "Cetirizine", category: "Tablet", img: "img4.jpg", expiration: "2025-11-20", price: "60", location: "Shelf D1", description: "Used for allergies and cold symptoms.", stock: true },
+        { name: "Metformin", category: "Tablet", img: "img5.jpg", expiration: "2026-01-15", price: "75", location: "Shelf E2", description: "Manages blood sugar levels in diabetes.", stock: true },
+        { name: "Ciprofloxacin", category: "Antibiotic", img: "img6.jpg", expiration: "2026-03-10", price: "150", location: "Shelf F3", description: "Broad-spectrum antibiotic.", stock: false },
+        { name: "Omeprazole", category: "Tablet", img: "img7.jpg", expiration: "2025-10-05", price: "90", location: "Shelf G4", description: "Treats acid reflux and ulcers.", stock: true },
+        { name: "Aspirin", category: "Tablet", img: "img8.jpg", expiration: "2025-08-30", price: "40", location: "Shelf H5", description: "Pain reliever and blood thinner.", stock: true },
+        { name: "Doxycycline", category: "Antibiotic", img: "img9.jpg", expiration: "2026-04-25", price: "200", location: "Shelf I6", description: "Antibiotic for bacterial infections.", stock: true },
+        { name: "Vitamin C", category: "Supplement", img: "img10.jpg", expiration: "2025-12-01", price: "35", location: "Shelf J7", description: "Boosts immunity and prevents scurvy.", stock: true },
+        { name: "Lorazepam", category: "Tablet", img: "img11.jpg", expiration: "2026-07-20", price: "180", location: "Shelf K8", description: "Treats anxiety disorders.", stock: true },
+        { name: "Prednisone", category: "Tablet", img: "img12.jpg", expiration: "2026-05-15", price: "160", location: "Shelf L9", description: "Steroid for inflammation and allergies.", stock: true },
+        { name: "Hydroxyzine", category: "Tablet", img: "img13.jpg", expiration: "2026-02-10", price: "140", location: "Shelf M10", description: "Treats anxiety and itching.", stock: true },
+        { name: "Ranitidine", category: "Tablet", img: "img14.jpg", expiration: "2025-06-30", price: "85", location: "Shelf N11", description: "Relieves stomach ulcers and reflux.", stock: true },
+        { name: "Clindamycin", category: "Antibiotic", img: "img15.jpg", expiration: "2026-09-30", price: "120", location: "Shelf O12", description: "Antibiotic for infections.", stock: true },
+        { name: "Azithromycin", category: "Antibiotic", img: "img16.jpg", expiration: "2025-07-15", price: "110", location: "Shelf P13", description: "Antibiotic for respiratory infections.", stock: false },
+        { name: "Atorvastatin", category: "Tablet", img: "img17.jpg", expiration: "2026-08-20", price: "130", location: "Shelf Q14", description: "Lowers cholesterol levels.", stock: true },
+        { name: "Lisinopril", category: "Tablet", img: "img18.jpg", expiration: "2025-09-25", price: "95", location: "Shelf R15", description: "Treats high blood pressure.", stock: true },
+        { name: "Albuterol", category: "Tablet", img: "img19.jpg", expiration: "2026-12-10", price: "125", location: "Shelf S16", description: "Relieves asthma symptoms.", stock: true },
+        { name: "Hydrochlorothiazide", category: "Tablet", img: "img20.jpg", expiration: "2026-11-05", price: "80", location: "Shelf T17", description: "Diuretic for high blood pressure.", stock: true }
+    ];
+
+    function renderMedicines(filter = "", category = "", sortBy = "") {
+        const container = document.getElementById("medicineContainer");
+        container.innerHTML = "";
+
+        let filteredMedicines = medicines.filter((med) =>
+            med.name.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        if (category) {
+            filteredMedicines = filteredMedicines.filter((med) => med.category === category);
+        }
+
+        if (sortBy === "name") {
+            filteredMedicines.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortBy === "price") {
+            filteredMedicines.sort((a, b) => a.price - b.price);
+        } else if (sortBy === "expiration") {
+            filteredMedicines.sort((a, b) => new Date(a.expiration) - new Date(b.expiration));
+        }
+
+        const today = new Date();
+        filteredMedicines.forEach((med) => {
+            // Store location info in sessionStorage
+            sessionStorage.setItem(med.name, med.location);
+
+            const expirationDate = new Date(med.expiration);
+            const isExpiredSoon = (expirationDate - today) / (1000 * 60 * 60 * 24) < 30;
+
+            const card = document.createElement("div");
+            card.className = `col-md-3 mb-4 ${isExpiredSoon ? "expired" : ""}`;
+            card.innerHTML = `
+                <div class="card medicine-card">
+                    <img src="${med.img}" class="card-img-top" alt="${med.name}">
+                    <div class="card-body">
+                        <h5 class="card-title">${med.name}</h5>
+                        <p class="card-text">${med.description}</p>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Price: &#8377;${med.price}</li>
+                            <li class="list-group-item">Expiration: ${med.expiration}</li>
+                            <li class="list-group-item">Category: ${med.category}</li>
+                            <li class="list-group-item">Stock: ${med.stock ? "<span class='text-success'>In Stock</span>" : "<span class='text-danger'>Out of Stock</span>"}</li>
+                            <li class="list-group-item">Location: ${sessionStorage.getItem(med.name)}</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    document.getElementById("searchBar").addEventListener("input", (e) => {
+        renderMedicines(e.target.value, document.getElementById("categoryFilter").value, document.getElementById("sortOptions").value);
+    });
+
+    document.getElementById("categoryFilter").addEventListener("change", (e) => {
+        renderMedicines(document.getElementById("searchBar").value, e.target.value, document.getElementById("sortOptions").value);
+    });
+
+    document.getElementById("sortOptions").addEventListener("change", (e) => {
+        renderMedicines(document.getElementById("searchBar").value, document.getElementById("categoryFilter").value, e.target.value);
+    });
+
+    document.getElementById("toggleMode").addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+    });
+
+    // Initial render
+    renderMedicines();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
